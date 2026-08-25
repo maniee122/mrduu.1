@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday! 🎉</title>
+    <style>
+        /* High-Level Modern Reset & Variables */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #111827, #311042);
+            --text-main: #ffffff;
+            --accent-pink: #ff477e;
+            --accent-yellow: #ffb703;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden; /* Changed from hidden to handle scroll on small screens */
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* Canvas for Interactive Confetti Overlay */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Card Container with Modern Glassmorphism effect */
+        .card-container {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem 2rem;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: scaleIn 0.8s ease-out forwards;
+        }
+
+        /* New Birthday Photo Styling */
+        .photo-wrapper {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 1.5rem auto;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-yellow));
+            box-shadow: 0 8px 24px rgba(255, 71, 126, 0.3);
+        }
+
+        .birthday-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #1f2937;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Surprise Button Architecture */
+        .btn-surprise {
+            background: linear-gradient(45deg, #ff477e, #ff7096);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-surprise:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 71, 126, 0.6);
+        }
+
+        .btn-surprise:active {
+            transform: translateY(-1px);
+        }
+
+        /* Hidden Message Architecture */
+        .hidden-message {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 0;
+            line-height: 1.6;
+            color: #e5e7eb;
+        }
+
+        .hidden-message.show {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Keyframe Animations */
+        @keyframes scaleIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Canvas Particle Layer -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Main Card Body Layout -->
+    <div class="card-container">
+        
+        <!-- NEW PHOTO CONTAINER -->
+        <div class="photo-wrapper">
+            <!-- Replace 'your-photo.jpg' with your actual image path or URL -->
+            <img src="c:\Users\manik\Downloads\BMW.j" alt="Birthday Person" class="birthday-photo">
+        </div>
+
+        <h1>Happy Birthday!</h1>
+        <p class="subtitle">To someone incredibly special ✨</p>
+        
+        <button class="btn-surprise" onclick="revealSurprise()">Click for a Surprise</button>
+        
+        <!-- Interactive hidden section -->
+        <div class="hidden-message" id="birthdayMessage">
+            <p>Wishing you a marvelous day filled with laughter, love, and your favorite cake! May this upcoming year bring you endless happiness and success. 🥂✨</p>
+        </div>
+    </div>
+
+    <!-- Script Layer for Logic, Physics-based Confetti & UX Events -->
+    <script>
+        function revealSurprise() {
+            const message = document.getElementById('birthdayMessage');
+            message.classList.toggle('show');
+            initConfetti();
+        }
+
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const colors = ['#ff477e', '#ffb703', '#06b6d4', '#10b981', '#a855f7'];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 6 + 4;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 3 + 2;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 4 - 2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height) {
+                    this.y = -10;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function initConfetti() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        initConfetti();
+        animate();
+    </script>
+</body>
+</html>
